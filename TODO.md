@@ -1,0 +1,21 @@
+# TODO
+- [ ] Simple frontend on react native
+- [ ] Simple document based database to hold just player information
+- [ ] Simple backend to hold player information 
+- [ ] Connect simple backend and frontend
+- [ ] Host locally, set up on cloudflare
+
+- [ ] Store game table for each player
+- [ ] Functionality to claim another player in backend
+- [ ] Skeleton frontend with just claim ability. 
+
+
+
+
+
+
+
+
+
+
+
