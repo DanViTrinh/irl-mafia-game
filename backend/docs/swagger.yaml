@@ -1,0 +1,211 @@
+definitions:
+  controllers.ActionRequest:
+    properties:
+      action:
+        example: claim
+        type: string
+      playerId:
+        example: player_object_id
+        type: string
+      targetId:
+        example: target_player_id
+        type: string
+    type: object
+  controllers.CreateGameRequest:
+    properties:
+      boardSize:
+        example: 3
+        type: integer
+      playerIds:
+        example:
+        - '["id1"'
+        - '"id2"]'
+        items:
+          type: string
+        type: array
+    type: object
+  controllers.JoinGameRequest:
+    properties:
+      playerId:
+        example: player_object_id
+        type: string
+    type: object
+  controllers.UserDTO:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.Game:
+    properties:
+      boardSize:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: string
+      players:
+        items:
+          type: string
+        type: array
+      status:
+        description: active, finished
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /games:
+    post:
+      consumes:
+      - application/json
+      description: Create a new game with a list of player IDs and board size
+      parameters:
+      - description: Game info
+        in: body
+        name: game
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.CreateGameRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new game
+      tags:
+      - games
+  /games/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the current state of a game by ID, including all players
+        and board size
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Game'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get current game state
+      tags:
+      - games
+  /games/{id}/action:
+    post:
+      consumes:
+      - application/json
+      description: Player performs "claim" or "guess" on a target player
+      parameters:
+      - description: Action info
+        in: body
+        name: action
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.ActionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Perform a daily action
+      tags:
+      - games
+  /games/{id}/join:
+    post:
+      consumes:
+      - application/json
+      description: Add a player to an existing game by game ID
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Player info
+        in: body
+        name: player
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.JoinGameRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Join an existing game
+      tags:
+      - games
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with username and password
+      parameters:
+      - description: User info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.UserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login a user
+      tags:
+      - users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with username and password
+      parameters:
+      - description: User info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.UserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - users
+swagger: "2.0"
