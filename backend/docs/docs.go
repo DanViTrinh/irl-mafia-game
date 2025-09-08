@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.CreateGameRequest"
+                            "$ref": "#/definitions/game.CreateGameRequest"
                         }
                     }
                 ],
@@ -52,7 +52,7 @@ const docTemplate = `{
         },
         "/games/{id}": {
             "get": {
-                "description": "Retrieve the current state of a game by ID, including all players and board size",
+                "description": "Retrieve game details by game ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -62,7 +62,7 @@ const docTemplate = `{
                 "tags": [
                     "games"
                 ],
-                "summary": "Get current game state",
+                "summary": "Get game details",
                 "parameters": [
                     {
                         "type": "string",
@@ -76,53 +76,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Game"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/games/{id}/action": {
-            "post": {
-                "description": "Player performs \"claim\" or \"guess\" on a target player",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "games"
-                ],
-                "summary": "Perform a daily action",
-                "parameters": [
-                    {
-                        "description": "Action info",
-                        "name": "action",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controllers.ActionRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/game.Game"
                         }
                     }
                 }
@@ -150,12 +104,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Player info",
-                        "name": "player",
+                        "description": "Join info",
+                        "name": "game",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.JoinGameRequest"
+                            "$ref": "#/definitions/game.JoinGameRequest"
                         }
                     }
                 ],
@@ -174,7 +128,7 @@ const docTemplate = `{
         },
         "/users/login": {
             "post": {
-                "description": "Authenticate user with username and password",
+                "description": "Authenticate user and return JWT token",
                 "consumes": [
                     "application/json"
                 ],
@@ -192,7 +146,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.UserDTO"
+                            "$ref": "#/definitions/user.LoginRequest"
                         }
                     }
                 ],
@@ -200,16 +154,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/user.LoginResponse"
                         }
                     }
                 }
             }
         },
-        "/users/register": {
+        "/users/signup": {
             "post": {
                 "description": "Create a new user with username and password",
                 "consumes": [
@@ -221,7 +172,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Register a new user",
+                "summary": "Signup a new user",
                 "parameters": [
                     {
                         "description": "User info",
@@ -229,7 +180,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controllers.UserDTO"
+                            "$ref": "#/definitions/user.SignupRequest"
                         }
                     }
                 ],
@@ -248,63 +199,21 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "controllers.ActionRequest": {
-            "type": "object",
-            "properties": {
-                "action": {
-                    "type": "string",
-                    "example": "claim"
-                },
-                "playerId": {
-                    "type": "string",
-                    "example": "player_object_id"
-                },
-                "targetId": {
-                    "type": "string",
-                    "example": "target_player_id"
-                }
-            }
-        },
-        "controllers.CreateGameRequest": {
+        "game.CreateGameRequest": {
             "type": "object",
             "properties": {
                 "boardSize": {
-                    "type": "integer",
-                    "example": 3
+                    "type": "integer"
                 },
                 "playerIds": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "example": [
-                        "[\"id1\"",
-                        "\"id2\"]"
-                    ]
+                    }
                 }
             }
         },
-        "controllers.JoinGameRequest": {
-            "type": "object",
-            "properties": {
-                "playerId": {
-                    "type": "string",
-                    "example": "player_object_id"
-                }
-            }
-        },
-        "controllers.UserDTO": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Game": {
+        "game.Game": {
             "type": "object",
             "properties": {
                 "boardSize": {
@@ -324,6 +233,58 @@ const docTemplate = `{
                 },
                 "status": {
                     "description": "active, finished",
+                    "type": "string"
+                }
+            }
+        },
+        "game.JoinGameRequest": {
+            "type": "object",
+            "properties": {
+                "playerId": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.LoginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.SignupRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }

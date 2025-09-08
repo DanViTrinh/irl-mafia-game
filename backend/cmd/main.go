@@ -1,36 +1,40 @@
 package main
 
 import (
-	"irl-mafia-game/controllers"
+	"context"
+	"irl-mafia-game/auth"
 	"irl-mafia-game/db"
+	"irl-mafia-game/game"
+	"irl-mafia-game/user"
+	"log"
 
 	"github.com/gin-gonic/gin"
-
-	_ "irl-mafia-game/docs" // swagger generated docs
-
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
-	client := db.Connect("mongodb://localhost:27017")
-	playerCollection := client.Database("fluGame").Collection("players")
-	gameCollection := client.Database("fluGame").Collection("games")
-	userCollection := client.Database("fluGame").Collection("users")
+	dbm, err := db.NewDBManager("mongodb://localhost:27017", "myapp")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dbm.Close(context.Background())
 
 	r := gin.Default()
 
-	// Swagger endpoint
+	// Public routes
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.POST("/signup", user.SignupHandler(dbm.UserRepo))
+	r.POST("/login", user.LoginHandler(dbm.UserRepo))
 
-	// API routes
-	r.POST("/users/register", controllers.RegisterUser(userCollection))
-	r.POST("/users/login", controllers.LoginUser(userCollection))
+	// Protected routes
+	protected := r.Group("/")
+	protected.Use(auth.AuthMiddleware())
 
-	r.POST("/games", controllers.CreateGame(gameCollection))
-	r.GET("/games/:id", controllers.GetGame(gameCollection))
-	r.POST("/games/:id/join", controllers.JoinGame(gameCollection))
-	r.POST("/games/:id/action", controllers.PerformAction(playerCollection))
+	// Game routes
+	protected.POST("/games", game.CreateGameHandler(dbm.GameRepo))
+	protected.GET("/games/:id", game.GetGameHandler(dbm.GameRepo))
+	protected.POST("/games/:id/join", game.JoinGameHandler(dbm.GameRepo))
 
 	r.Run(":8080")
 }

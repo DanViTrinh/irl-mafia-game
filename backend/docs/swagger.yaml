@@ -1,43 +1,14 @@
 definitions:
-  controllers.ActionRequest:
-    properties:
-      action:
-        example: claim
-        type: string
-      playerId:
-        example: player_object_id
-        type: string
-      targetId:
-        example: target_player_id
-        type: string
-    type: object
-  controllers.CreateGameRequest:
+  game.CreateGameRequest:
     properties:
       boardSize:
-        example: 3
         type: integer
       playerIds:
-        example:
-        - '["id1"'
-        - '"id2"]'
         items:
           type: string
         type: array
     type: object
-  controllers.JoinGameRequest:
-    properties:
-      playerId:
-        example: player_object_id
-        type: string
-    type: object
-  controllers.UserDTO:
-    properties:
-      password:
-        type: string
-      username:
-        type: string
-    type: object
-  models.Game:
+  game.Game:
     properties:
       boardSize:
         type: integer
@@ -53,6 +24,40 @@ definitions:
         description: active, finished
         type: string
     type: object
+  game.JoinGameRequest:
+    properties:
+      playerId:
+        type: string
+    type: object
+  user.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  user.LoginResponse:
+    properties:
+      id:
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    type: object
+  user.SignupRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
 info:
   contact: {}
 paths:
@@ -67,7 +72,7 @@ paths:
         name: game
         required: true
         schema:
-          $ref: '#/definitions/controllers.CreateGameRequest'
+          $ref: '#/definitions/game.CreateGameRequest'
       produces:
       - application/json
       responses:
@@ -83,8 +88,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve the current state of a game by ID, including all players
-        and board size
+      description: Retrieve game details by game ID
       parameters:
       - description: Game ID
         in: path
@@ -97,38 +101,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Game'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get current game state
-      tags:
-      - games
-  /games/{id}/action:
-    post:
-      consumes:
-      - application/json
-      description: Player performs "claim" or "guess" on a target player
-      parameters:
-      - description: Action info
-        in: body
-        name: action
-        required: true
-        schema:
-          $ref: '#/definitions/controllers.ActionRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Perform a daily action
+            $ref: '#/definitions/game.Game'
+      summary: Get game details
       tags:
       - games
   /games/{id}/join:
@@ -142,12 +116,12 @@ paths:
         name: id
         required: true
         type: string
-      - description: Player info
+      - description: Join info
         in: body
-        name: player
+        name: game
         required: true
         schema:
-          $ref: '#/definitions/controllers.JoinGameRequest'
+          $ref: '#/definitions/game.JoinGameRequest'
       produces:
       - application/json
       responses:
@@ -164,27 +138,25 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticate user with username and password
+      description: Authenticate user and return JWT token
       parameters:
       - description: User info
         in: body
         name: user
         required: true
         schema:
-          $ref: '#/definitions/controllers.UserDTO'
+          $ref: '#/definitions/user.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/user.LoginResponse'
       summary: Login a user
       tags:
       - users
-  /users/register:
+  /users/signup:
     post:
       consumes:
       - application/json
@@ -195,7 +167,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/controllers.UserDTO'
+          $ref: '#/definitions/user.SignupRequest'
       produces:
       - application/json
       responses:
@@ -205,7 +177,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Register a new user
+      summary: Signup a new user
       tags:
       - users
 swagger: "2.0"
