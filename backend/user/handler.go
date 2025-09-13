@@ -34,7 +34,7 @@ type LoginResponse struct {
 // @Produce json
 // @Param user body SignupRequest true "User info"
 // @Success 200 {object} map[string]string
-// @Router /users/signup [post]
+// @Router /signup [post]
 func SignupHandler(repo UserRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req SignupRequest

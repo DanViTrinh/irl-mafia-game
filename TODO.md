@@ -3,6 +3,7 @@
 - [x] Simple frontend on react native
 - [ ] Simple document based database to hold just player information
   - [ ] Fix current backend code, refactor and test etc
+  - [ ] Persistent storage in docker
 - [ ] Simple backend to hold player information
 - [ ] Connect simple backend and frontend
 - [ ] Host locally, set up on cloudflare

@@ -8,13 +8,15 @@ import (
 	"irl-mafia-game/user"
 	"log"
 
+	_ "irl-mafia-game/docs" // Swagger docs
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
-	dbm, err := db.NewDBManager("mongodb://localhost:27017", "myapp")
+	dbm, err := db.NewDBManager("mongodb://localhost:27017", "irl-mafia-game")
 	if err != nil {
 		log.Fatal(err)
 	}
