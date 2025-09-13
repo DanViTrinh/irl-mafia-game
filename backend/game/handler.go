@@ -35,6 +35,7 @@ type ActionRequest struct {
 // @Param game body CreateGameRequest true "Game info"
 // @Success 200 {object} map[string]interface{}
 // @Router /games [post]
+// @Security BearerAuth
 func CreateGameHandler(repo GameRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req CreateGameRequest
@@ -80,6 +81,7 @@ func CreateGameHandler(repo GameRepository) gin.HandlerFunc {
 // @Param game body JoinGameRequest true "Join info"
 // @Success 200 {object} map[string]string
 // @Router /games/{id}/join [post]
+// @Security BearerAuth
 func JoinGameHandler(repo GameRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		gameID := c.Param("id")
@@ -119,6 +121,7 @@ func JoinGameHandler(repo GameRepository) gin.HandlerFunc {
 // @Param id path string true "Game ID"
 // @Success 200 {object} Game
 // @Router /games/{id} [get]
+// @Security BearerAuth
 func GetGameHandler(repo GameRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		gameID := c.Param("id")

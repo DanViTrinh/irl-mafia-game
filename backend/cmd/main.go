@@ -15,6 +15,9 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	dbm, err := db.NewDBManager("mongodb://localhost:27017", "irl-mafia-game")
 	if err != nil {
@@ -32,6 +35,9 @@ func main() {
 	// Protected routes
 	protected := r.Group("/")
 	protected.Use(auth.AuthMiddleware())
+
+	// User routes
+	protected.GET("/users", user.GetAllUsersHandler(dbm.UserRepo))
 
 	// Game routes
 	protected.POST("/games", game.CreateGameHandler(dbm.GameRepo))

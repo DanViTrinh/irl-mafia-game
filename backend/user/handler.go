@@ -92,3 +92,23 @@ func LoginHandler(repo UserRepository) gin.HandlerFunc {
 		})
 	}
 }
+
+// GetAllUsersHandler godoc
+// @Summary Get all users
+// @Description Retrieve a list of all users
+// @Tags users
+// @Accept json
+// @Produce json
+// @Success 200 {array} User
+// @Router /users [get]
+// @Security BearerAuth
+func GetAllUsersHandler(repo UserRepository) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		users, err := repo.GetAllUsers(c.Request.Context())
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, users)
+	}
+}
