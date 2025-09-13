@@ -16,7 +16,7 @@ type SignupRequest struct {
 }
 
 type LoginRequest struct {
-	Username string `json:"username" binding:"required,email"`
+	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -65,7 +65,7 @@ func SignupHandler(repo UserRepository) gin.HandlerFunc {
 // @Produce json
 // @Param user body LoginRequest true "User info"
 // @Success 200 {object} LoginResponse
-// @Router /users/login [post]
+// @Router /login [post]
 func LoginHandler(repo UserRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req LoginRequest

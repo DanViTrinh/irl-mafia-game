@@ -134,6 +134,28 @@ paths:
       summary: Join an existing game
       tags:
       - games
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: User info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.LoginResponse'
+      summary: Login a user
+      tags:
+      - users
   /signup:
     post:
       consumes:
@@ -156,28 +178,6 @@ paths:
               type: string
             type: object
       summary: Signup a new user
-      tags:
-      - users
-  /users/login:
-    post:
-      consumes:
-      - application/json
-      description: Authenticate user and return JWT token
-      parameters:
-      - description: User info
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/user.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/user.LoginResponse'
-      summary: Login a user
       tags:
       - users
 swagger: "2.0"
