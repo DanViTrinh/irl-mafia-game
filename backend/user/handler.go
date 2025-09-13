@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -119,37 +120,6 @@ func GetAllUsersHandler(repo UserRepository) gin.HandlerFunc {
 	}
 }
 
-// GetUserNamesFromIDs godoc
-// @Summary Get usernames from user IDs
-// @Description Retrieve usernames for a list of user IDs
-// @Tags users
-// @Accept json
-// @Produce json
-// @Param ids body []string true "List of User IDs"
-// @Success 200 {array} string
-// @Router /users/names [post]
-// @Security BearerAuth
-func GetUserNamesFromIDs(repo UserRepository) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var userNames []string
-		var ids []string
-		if err := c.BindJSON(&ids); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		for _, id := range ids {
-			user, err := repo.FindUserWithID(c.Request.Context(), id)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-			userNames = append(userNames, user.Username)
-		}
-		c.JSON(http.StatusOK, userNames)
-	}
-}
-
 // GetCurrentUserHandler godoc
 // @Summary Get current user
 // @Description Retrieve details of the currently authenticated user
@@ -167,7 +137,13 @@ func GetCurrentUserHandler(repo UserRepository) gin.HandlerFunc {
 			return
 		}
 
-		user, err := repo.FindUserWithID(c.Request.Context(), userID.(string))
+		userObjectId, err := primitive.ObjectIDFromHex(userID.(string))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user ID"})
+			return
+		}
+
+		user, err := repo.FindUserWithID(c.Request.Context(), userObjectId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

@@ -24,11 +24,6 @@ definitions:
         description: active, finished
         type: string
     type: object
-  game.JoinGameRequest:
-    properties:
-      playerId:
-        type: string
-    type: object
   user.LoginRequest:
     properties:
       password:
@@ -138,12 +133,6 @@ paths:
         name: id
         required: true
         type: string
-      - description: Join info
-        in: body
-        name: game
-        required: true
-        schema:
-          $ref: '#/definitions/game.JoinGameRequest'
       produces:
       - application/json
       responses:
@@ -156,6 +145,31 @@ paths:
       security:
       - BearerAuth: []
       summary: Join an existing game
+      tags:
+      - games
+  /games/{id}/players:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve usernames for all players in a specified game
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get usernames of players in a game
       tags:
       - games
   /games/create:
@@ -263,34 +277,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Get current user
-      tags:
-      - users
-  /users/names:
-    post:
-      consumes:
-      - application/json
-      description: Retrieve usernames for a list of user IDs
-      parameters:
-      - description: List of User IDs
-        in: body
-        name: ids
-        required: true
-        schema:
-          items:
-            type: string
-          type: array
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              type: string
-            type: array
-      security:
-      - BearerAuth: []
-      summary: Get usernames from user IDs
       tags:
       - users
 securityDefinitions:

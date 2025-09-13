@@ -16,10 +16,6 @@ type CreateGameRequest struct {
 	BoardSize int      `json:"boardSize"`
 }
 
-type JoinGameRequest struct {
-	PlayerID string `json:"playerId"`
-}
-
 type ActionRequest struct {
 	TargetID string `json:"targetId"`
 	Action   string `json:"action"`
@@ -89,18 +85,18 @@ func CreateGameHandler(gameRepo GameRepository, userRepo user.UserRepository) gi
 // @Accept json
 // @Produce json
 // @Param id path string true "Game ID"
-// @Param game body JoinGameRequest true "Join info"
 // @Success 200 {object} map[string]string
 // @Router /games/{id}/join [post]
 // @Security BearerAuth
 func JoinGameHandler(gameRepo GameRepository, userRepo user.UserRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		gameID := c.Param("id")
-		var req JoinGameRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		userID, exists := c.Get("user_id")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "user ID not found in context"})
 			return
 		}
+
+		gameID := c.Param("id")
 
 		gameObjID, err := primitive.ObjectIDFromHex(gameID)
 		if err != nil {
@@ -108,18 +104,18 @@ func JoinGameHandler(gameRepo GameRepository, userRepo user.UserRepository) gin.
 			return
 		}
 
-		playerObjID, err := primitive.ObjectIDFromHex(req.PlayerID)
+		userObjID, err := primitive.ObjectIDFromHex(userID.(string))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid player ID"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user ID"})
 			return
 		}
 
-		if err := gameRepo.AddPlayer(context.Background(), gameObjID, playerObjID); err != nil {
+		if err := gameRepo.AddPlayer(context.Background(), gameObjID, userObjID); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		err = userRepo.AddGameToUser(context.Background(), playerObjID, gameObjID)
+		err = userRepo.AddGameToUser(context.Background(), userObjID, gameObjID)
 		if err != nil {
 			println("Failed to add game to user:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update user"})
@@ -176,6 +172,47 @@ func GetAllGamesHandler(repo GameRepository) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, games)
+	}
+}
+
+// TODO: duplicate could be refactored
+
+// GetPlayersUsernamesHandler godoc
+// @Summary Get usernames of players in a game
+// @Description Retrieve usernames for all players in a specified game
+// @Tags games
+// @Accept json
+// @Produce json
+// @Param id path string true "Game ID"
+// @Success 200 {array} string
+// @Router /games/{id}/players [get]
+// @Security BearerAuth
+func GetPlayersUsernamesHandler(gameRepo GameRepository, userRepo user.UserRepository) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		gameID := c.Param("id")
+		gameObjID, err := primitive.ObjectIDFromHex(gameID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid game ID"})
+			return
+		}
+
+		game, err := gameRepo.GetByID(context.Background(), gameObjID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "game not found"})
+			return
+		}
+
+		var userNames []string
+
+		for _, userId := range game.Players {
+			user, err := userRepo.FindUserWithID(c.Request.Context(), userId)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			userNames = append(userNames, user.Username)
+		}
+		c.JSON(http.StatusOK, userNames)
 	}
 }
 

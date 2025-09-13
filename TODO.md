@@ -10,7 +10,7 @@
 
 - [ ] Host locally, set up on cloudflare
 
-- [ ] Check for duplicate username during user creation
+- [x] Check for duplicate username during user creation
 
 - [ ] Store game table for each player
 - [ ] Functionality to claim another player in backend

@@ -12,7 +12,7 @@ import (
 // Interface that handlers/services depend on
 type UserRepository interface {
 	AddUser(context context.Context, user User) error
-	FindUserWithID(context context.Context, id string) (User, error)
+	FindUserWithID(context context.Context, id primitive.ObjectID) (User, error)
 	FindUserWithUsername(context context.Context, username string) (User, error)
 	GetAllUsers(context context.Context) ([]UserResponse, error)
 	AddGameToUser(context context.Context, userID primitive.ObjectID, gameID primitive.ObjectID) error
@@ -58,14 +58,9 @@ func (r *mongoRepository) AddGameToUser(context context.Context, userID primitiv
 	return nil
 }
 
-func (r *mongoRepository) FindUserWithID(context context.Context, id string) (User, error) {
+func (r *mongoRepository) FindUserWithID(context context.Context, id primitive.ObjectID) (User, error) {
 	var user User
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return user, err
-	}
-	print("Looking for user with ID:", objID.Hex())
-	err = r.collection.FindOne(context, bson.M{"_id": objID}).Decode(&user)
+	err := r.collection.FindOne(context, bson.M{"_id": id}).Decode(&user)
 	return user, err
 }
 

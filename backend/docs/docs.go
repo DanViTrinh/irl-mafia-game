@@ -148,15 +148,6 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Join info",
-                        "name": "game",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/game.JoinGameRequest"
-                        }
                     }
                 ],
                 "responses": {
@@ -165,6 +156,46 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/games/{id}/players": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve usernames for all players in a specified game",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "games"
+                ],
+                "summary": "Get usernames of players in a game",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Game ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
                                 "type": "string"
                             }
                         }
@@ -301,51 +332,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/users/names": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieve usernames for a list of user IDs",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get usernames from user IDs",
-                "parameters": [
-                    {
-                        "description": "List of User IDs",
-                        "name": "ids",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -383,14 +369,6 @@ const docTemplate = `{
                 },
                 "status": {
                     "description": "active, finished",
-                    "type": "string"
-                }
-            }
-        },
-        "game.JoinGameRequest": {
-            "type": "object",
-            "properties": {
-                "playerId": {
                     "type": "string"
                 }
             }
