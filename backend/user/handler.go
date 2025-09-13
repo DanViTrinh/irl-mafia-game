@@ -3,7 +3,6 @@ package user
 
 import (
 	"irl-mafia-game/auth"
-	"irl-mafia-game/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +42,7 @@ func SignupHandler(repo UserRepository) gin.HandlerFunc {
 			return
 		}
 
-		user := models.User{
+		user := User{
 			Username: req.Username,
 			Password: req.Password,
 		}
