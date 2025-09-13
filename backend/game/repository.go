@@ -13,6 +13,7 @@ type GameRepository interface {
 	Create(ctx context.Context, g Game) (primitive.ObjectID, error)
 	GetByID(ctx context.Context, id primitive.ObjectID) (Game, error)
 	AddPlayer(ctx context.Context, gameID, playerID primitive.ObjectID) error
+	GetAllGames(ctx context.Context) ([]Game, error)
 }
 
 type mongoRepository struct {
@@ -48,4 +49,16 @@ func (r *mongoRepository) AddPlayer(ctx context.Context, gameID, playerID primit
 		bson.M{"$addToSet": bson.M{"players": playerID}},
 	)
 	return err
+}
+
+func (r *mongoRepository) GetAllGames(ctx context.Context) ([]Game, error) {
+	var games []Game
+	cursor, err := r.col.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	if err := cursor.All(ctx, &games); err != nil {
+		return nil, err
+	}
+	return games, nil
 }

@@ -60,9 +60,24 @@ definitions:
     type: object
   user.User:
     properties:
+      games:
+        items:
+          type: string
+        type: array
       id:
         type: string
       password:
+        type: string
+      username:
+        type: string
+    type: object
+  user.UserResponse:
+    properties:
+      games:
+        items:
+          type: string
+        type: array
+      id:
         type: string
       username:
         type: string
@@ -71,28 +86,22 @@ info:
   contact: {}
 paths:
   /games:
-    post:
+    get:
       consumes:
       - application/json
-      description: Create a new game with a list of player IDs and board size
-      parameters:
-      - description: Game info
-        in: body
-        name: game
-        required: true
-        schema:
-          $ref: '#/definitions/game.CreateGameRequest'
+      description: Retrieve a list of all games
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/game.Game'
+            type: array
       security:
       - BearerAuth: []
-      summary: Create a new game
+      summary: Get all games
       tags:
       - games
   /games/{id}:
@@ -147,6 +156,31 @@ paths:
       security:
       - BearerAuth: []
       summary: Join an existing game
+      tags:
+      - games
+  /games/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new game with a list of player IDs and board size
+      parameters:
+      - description: Game info
+        in: body
+        name: game
+        required: true
+        schema:
+          $ref: '#/definitions/game.CreateGameRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new game
       tags:
       - games
   /login:
@@ -212,6 +246,51 @@ paths:
       security:
       - BearerAuth: []
       summary: Get all users
+      tags:
+      - users
+  /users/me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.UserResponse'
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - users
+  /users/names:
+    post:
+      consumes:
+      - application/json
+      description: Retrieve usernames for a list of user IDs
+      parameters:
+      - description: List of User IDs
+        in: body
+        name: ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get usernames from user IDs
       tags:
       - users
 securityDefinitions:

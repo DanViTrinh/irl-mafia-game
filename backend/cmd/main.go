@@ -50,11 +50,14 @@ func main() {
 
 	// User routes
 	protected.GET("/users", user.GetAllUsersHandler(dbm.UserRepo))
+	protected.GET("/users/names", user.GetUserNamesFromIDs(dbm.UserRepo))
+	protected.GET("/users/me", user.GetCurrentUserHandler(dbm.UserRepo))
 
 	// Game routes
-	protected.POST("/games", game.CreateGameHandler(dbm.GameRepo))
+	protected.GET("/games", game.GetAllGamesHandler(dbm.GameRepo))
+	protected.POST("/games/create", game.CreateGameHandler(dbm.GameRepo, dbm.UserRepo))
 	protected.GET("/games/:id", game.GetGameHandler(dbm.GameRepo))
-	protected.POST("/games/:id/join", game.JoinGameHandler(dbm.GameRepo))
+	protected.POST("/games/:id/join", game.JoinGameHandler(dbm.GameRepo, dbm.UserRepo))
 
 	r.Run(":8080")
 }

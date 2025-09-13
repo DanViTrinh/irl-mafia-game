@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -47,7 +48,12 @@ func SignupHandler(repo UserRepository) gin.HandlerFunc {
 			Password: req.Password,
 		}
 
-		if err := repo.AddUser(c.Request.Context(), user); err != nil {
+		err := repo.AddUser(c.Request.Context(), user)
+		if mongo.IsDuplicateKeyError(err) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "username already exists"})
+			return
+		}
+		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -110,5 +116,73 @@ func GetAllUsersHandler(repo UserRepository) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, users)
+	}
+}
+
+// GetUserNamesFromIDs godoc
+// @Summary Get usernames from user IDs
+// @Description Retrieve usernames for a list of user IDs
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param ids body []string true "List of User IDs"
+// @Success 200 {array} string
+// @Router /users/names [post]
+// @Security BearerAuth
+func GetUserNamesFromIDs(repo UserRepository) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var userNames []string
+		var ids []string
+		if err := c.BindJSON(&ids); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		for _, id := range ids {
+			user, err := repo.FindUserWithID(c.Request.Context(), id)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			userNames = append(userNames, user.Username)
+		}
+		c.JSON(http.StatusOK, userNames)
+	}
+}
+
+// GetCurrentUserHandler godoc
+// @Summary Get current user
+// @Description Retrieve details of the currently authenticated user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Success 200 {object} UserResponse
+// @Router /users/me [get]
+// @Security BearerAuth
+func GetCurrentUserHandler(repo UserRepository) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, exists := c.Get("user_id")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "user ID not found in context"})
+			return
+		}
+
+		user, err := repo.FindUserWithID(c.Request.Context(), userID.(string))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, UserResponse{
+			ID:       user.ID.Hex(),
+			Username: user.Username,
+			Games: func() []string {
+				ids := make([]string, len(user.Games))
+				for i, id := range user.Games {
+					ids[i] = id.Hex()
+				}
+				return ids
+			}(),
+		})
 	}
 }

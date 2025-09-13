@@ -16,6 +16,37 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/games": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of all games",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "games"
+                ],
+                "summary": "Get all games",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/game.Game"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/games/create": {
             "post": {
                 "security": [
                     {
@@ -242,6 +273,79 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve details of the currently authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get current user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.UserResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/names": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve usernames for a list of user IDs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get usernames from user IDs",
+                "parameters": [
+                    {
+                        "description": "List of User IDs",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -338,10 +442,33 @@ const docTemplate = `{
         "user.User": {
             "type": "object",
             "properties": {
+                "games": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "id": {
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.UserResponse": {
+            "type": "object",
+            "properties": {
+                "games": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
                     "type": "string"
                 },
                 "username": {

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -11,8 +12,10 @@ import (
 // Interface that handlers/services depend on
 type UserRepository interface {
 	AddUser(context context.Context, user User) error
+	FindUserWithID(context context.Context, id string) (User, error)
 	FindUserWithUsername(context context.Context, username string) (User, error)
 	GetAllUsers(context context.Context) ([]UserResponse, error)
+	AddGameToUser(context context.Context, userID primitive.ObjectID, gameID primitive.ObjectID) error
 }
 
 // Mongo implementation
@@ -32,6 +35,38 @@ func (r *mongoRepository) AddUser(context context.Context, user User) error {
 	user.Password = string(hashed)
 	_, err = r.collection.InsertOne(context, user)
 	return err
+}
+
+func (r *mongoRepository) AddGameToUser(context context.Context, userID primitive.ObjectID, gameID primitive.ObjectID) error {
+	// Convert string ID to ObjectID
+	r.collection.UpdateByID(context, userID, bson.M{
+		"$addToSet": bson.M{"friends": "asdflkj"},
+	})
+
+	result, err := r.collection.UpdateByID(context, userID, bson.M{
+		"$addToSet": bson.M{"games": gameID},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+
+	return nil
+}
+
+func (r *mongoRepository) FindUserWithID(context context.Context, id string) (User, error) {
+	var user User
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return user, err
+	}
+	print("Looking for user with ID:", objID.Hex())
+	err = r.collection.FindOne(context, bson.M{"_id": objID}).Decode(&user)
+	return user, err
 }
 
 func (r *mongoRepository) FindUserWithUsername(context context.Context, username string) (User, error) {

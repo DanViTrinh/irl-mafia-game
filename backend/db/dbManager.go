@@ -8,6 +8,7 @@ import (
 	"irl-mafia-game/user"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -35,6 +36,18 @@ func NewDBManager(uri, dbName string) (*DBManager, error) {
 	}
 
 	db := client.Database(dbName)
+
+	// Ensure unique index on username in users collection
+	indexModel := mongo.IndexModel{
+		Keys:    bson.M{"username": 1},
+		Options: options.Index().SetUnique(true),
+	}
+
+	_, err = db.Collection("users").Indexes().CreateOne(context.Background(), indexModel)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create index: %w", err)
+	}
 
 	return &DBManager{
 		Client:   client,
