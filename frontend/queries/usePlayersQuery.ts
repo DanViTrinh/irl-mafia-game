@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchPlayers } from "../services/players";
+import { fetchAllUsers } from "../services/users";
 
-export const usePlayersQuery = () => {
+export const useUsersQuery = () => {
   return useQuery({
-    queryKey: ["players"], // unique key for this query
-    queryFn: fetchPlayers, // function that returns a Promise
+    queryKey: ["allUsers"], // unique key for this query
+    queryFn: fetchAllUsers, // function that returns a Promise
   });
 };

@@ -8,7 +8,7 @@
 - [ ] Connect simple backend and frontend
 - [ ] Host locally, set up on cloudflare
 
-- [ ] Set up linter and prettier
+- [ ] Check for duplicate username during user creation
 
 - [ ] Store game table for each player
 - [ ] Functionality to claim another player in backend
