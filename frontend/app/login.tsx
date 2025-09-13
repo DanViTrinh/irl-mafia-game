@@ -1,19 +1,35 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useRouter } from "expo-router";
+import { useMutation } from "@tanstack/react-query";
+import { loginUser } from "@/services/users";
 
 export default function LoginScreen() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    if (username && password) {
-      Alert.alert("Login Success", `Welcome ${username}`);
+  const loginMutation = useMutation({
+    mutationFn: async () => {
+      const { success, user } = await loginUser(username, password);
+      return { success, user };
+    },
+    onSuccess: () => {
+      Alert.alert("Success", "Logged in successfully");
       router.push("/game");
-    } else {
+    },
+    onError: (error: any) => {
+      Alert.alert("Error", error.response?.data?.message || "Login failed");
+    },
+  });
+
+  const handleLogin = () => {
+    if (!username || !password) {
       Alert.alert("Error", "Please enter username and password");
+      return;
     }
+
+    loginMutation.mutate();
   };
 
   const handleSignup = () => {
