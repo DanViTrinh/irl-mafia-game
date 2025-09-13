@@ -5,7 +5,9 @@
   - [x] Fix current backend code, refactor and test etc
   - [x] Persistent storage in docker
 - [x] Simple backend to hold player information
-- [ ] Connect simple backend and frontend
+- [x] Connect simple backend and frontend
+- [ ] Simple game in frontend
+
 - [ ] Host locally, set up on cloudflare
 
 - [ ] Check for duplicate username during user creation

@@ -7,3 +7,8 @@ type User struct {
 	Username string             `bson:"username"`
 	Password string             `bson:"password"`
 }
+
+type UserResponse struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+}

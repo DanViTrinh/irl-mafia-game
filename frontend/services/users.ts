@@ -3,7 +3,7 @@ import api from "./api";
 
 export const fetchAllUsers = async (): Promise<string[]> => {
   const { data } = await api.get("/users");
-  return data.results.map((user: any) => user.name);
+  return data.map((user: any) => user.username);
 };
 
 export const signupUser = async (
